@@ -90,7 +90,7 @@ export default function App() {
   }, [weatherData, units]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden">
       {/* Bento Header */}
       <Header
         currentCity={city}
@@ -103,7 +103,7 @@ export default function App() {
       />
 
       {/* Main Bento Grid Canvas */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8 space-y-5">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 md:py-8 space-y-5 min-w-0">
         {/* Error State */}
         {error && !isLoading && (
           <ErrorState
@@ -120,12 +120,12 @@ export default function App() {
         {/* Bento Grid Layout */}
         {weatherData && (
           <div
-            className={`grid grid-cols-1 lg:grid-cols-12 gap-5 transition-opacity duration-200 ${
+            className={`grid grid-cols-1 lg:grid-cols-12 gap-5 transition-opacity duration-200 min-w-0 ${
               isLoading ? 'opacity-60' : 'opacity-100'
             }`}
           >
             {/* Primary Left Column (Span 8) */}
-            <div className="lg:col-span-8 flex flex-col gap-5">
+            <div className="lg:col-span-8 flex flex-col gap-5 min-w-0 w-full">
               {/* Current Weather Bento Hero */}
               <CurrentWeatherCard data={weatherData} units={units} />
 
@@ -137,7 +137,7 @@ export default function App() {
             </div>
 
             {/* Right Column (Span 4) - 7-Day Forecast Bento Stack */}
-            <div className="lg:col-span-4 flex flex-col">
+            <div className="lg:col-span-4 flex flex-col min-w-0 w-full">
               <ForecastRow daily={weatherData.daily} units={units} />
             </div>
           </div>

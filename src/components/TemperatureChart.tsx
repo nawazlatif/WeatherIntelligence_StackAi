@@ -46,9 +46,9 @@ export const TemperatureChart: React.FC<TemperatureChartProps> = ({ daily, units
   return (
     <div
       id="temperature-chart-section"
-      className="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 flex flex-col shadow-xl"
+      className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 md:p-6 flex flex-col shadow-xl min-w-0 overflow-hidden"
     >
-      <div className="flex items-center justify-between gap-2 mb-5">
+      <div className="flex items-center justify-between gap-2 mb-5 flex-wrap">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-cyan-400" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
@@ -56,7 +56,7 @@ export const TemperatureChart: React.FC<TemperatureChartProps> = ({ daily, units
           </h3>
         </div>
 
-        <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
+        <div className="flex items-center gap-3 sm:gap-4 text-xs font-bold text-slate-400">
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)] inline-block" />
             <span className="text-slate-200">MAX ({tempUnit})</span>
@@ -68,7 +68,7 @@ export const TemperatureChart: React.FC<TemperatureChartProps> = ({ daily, units
         </div>
       </div>
 
-      <div className="w-full h-64">
+      <div className="w-full h-64 min-w-0">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}

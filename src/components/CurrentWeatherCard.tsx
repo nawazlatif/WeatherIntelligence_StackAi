@@ -47,32 +47,34 @@ export const CurrentWeatherCard: React.FC<CurrentWeatherCardProps> = ({
   return (
     <div
       id="current-weather-hero"
-      className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800/90 border border-slate-800/60 rounded-3xl p-6 md:p-8 relative flex flex-col justify-between overflow-hidden shadow-2xl group"
+      className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800/90 border border-slate-800/60 rounded-3xl p-5 sm:p-6 md:p-8 relative flex flex-col justify-between overflow-hidden shadow-2xl group min-w-0"
     >
       {/* Ambient glowing radial blur */}
       <div className="absolute top-[-20px] right-[-20px] w-64 h-64 bg-cyan-500/10 blur-[80px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-30px] left-[-30px] w-48 h-48 bg-indigo-500/5 blur-[70px] rounded-full pointer-events-none" />
 
       {/* Top section: City, Condition, and Big Temp */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 z-10 mb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4 z-10 mb-6 w-full min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1.5 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400 inline-block animate-pulse" />
             Current Weather
           </p>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
+          <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight break-words">
               {city}
             </h2>
             {country && (
-              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60">
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700/60 break-words leading-tight">
                 {admin1 ? `${admin1}, ${country}` : country}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 text-sm text-slate-400 mt-2 font-medium">
-            <Icon className={`w-4 h-4 ${condition.iconColor}`} />
-            <span>{condition.label}</span>
+          <div className="flex items-center gap-2 text-sm text-slate-400 mt-2 font-medium flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <Icon className={`w-4 h-4 shrink-0 ${condition.iconColor}`} />
+              <span>{condition.label}</span>
+            </div>
             <span>•</span>
             <span className="text-slate-400">{condition.description}</span>
           </div>
@@ -157,7 +159,7 @@ export const CurrentWeatherCard: React.FC<CurrentWeatherCardProps> = ({
             <p className="text-[10px] uppercase text-slate-500 tracking-wider font-bold">
               Zone
             </p>
-            <p className="text-sm font-bold text-slate-200 truncate leading-tight">
+            <p className="text-xs sm:text-sm font-bold text-slate-200 break-words leading-tight">
               {timezone.replace('_', ' ')}
             </p>
           </div>

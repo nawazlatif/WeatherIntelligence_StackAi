@@ -62,25 +62,25 @@ export const PlanningRecommendations: React.FC<PlanningRecommendationsProps> = (
   return (
     <div
       id="planning-recommendations-section"
-      className="bg-slate-900 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-xl"
+      className="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 md:p-6 shadow-xl min-w-0 overflow-hidden"
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+        <div className="flex items-start sm:items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5 sm:mt-0">
             <Lightbulb className="w-5 h-5" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-300">
               Weather Intelligence Engine
             </h3>
-            <p className="text-[11px] text-slate-400 font-medium">
+            <p className="text-[11px] text-slate-400 font-medium leading-normal mt-0.5">
               Actionable outdoor & travel advice computed from 7-day model outputs
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 min-w-0">
         {recommendations.map((rec) => {
           const Icon = getIcon(rec.category);
           const style = getUrgencyStyles(rec.urgency);
@@ -89,29 +89,29 @@ export const PlanningRecommendations: React.FC<PlanningRecommendationsProps> = (
             <div
               key={rec.id}
               id={`recommendation-card-${rec.id}`}
-              className="rounded-2xl p-4 bg-slate-800/40 hover:bg-slate-800/70 border border-slate-800 transition-all duration-150 flex items-start gap-3.5"
+              className="rounded-2xl p-3.5 sm:p-4 bg-slate-800/40 hover:bg-slate-800/70 border border-slate-800 transition-all duration-150 flex items-start gap-3 sm:gap-3.5 min-w-0 overflow-hidden"
             >
               <div
-                className={`p-2.5 rounded-xl shrink-0 flex items-center justify-center border border-white/5 ${style.iconColor}`}
+                className={`p-2 sm:p-2.5 rounded-xl shrink-0 flex items-center justify-center border border-white/5 mt-0.5 ${style.iconColor}`}
               >
                 <Icon className="w-4 h-4" />
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-1.5 h-1.5 rounded-full ${style.dotColor}`} />
-                    <h4 className="text-xs font-bold text-slate-100 truncate">
+                <div className="flex items-start justify-between gap-2 mb-1.5 min-w-0">
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${style.dotColor}`} />
+                    <h4 className="text-xs font-bold text-slate-100 leading-snug break-words">
                       {rec.title}
                     </h4>
                   </div>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 uppercase tracking-wider ${style.badgeText}`}
+                    className={`text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 uppercase tracking-wider self-start ${style.badgeText}`}
                   >
                     {style.label}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-slate-400 leading-relaxed break-words">
                   {rec.description}
                 </p>
               </div>

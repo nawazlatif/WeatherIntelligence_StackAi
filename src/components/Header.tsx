@@ -36,15 +36,20 @@ export const Header: React.FC<HeaderProps> = ({
   const [suggestions, setSuggestions] = useState<GeocodingResult[]>([]);
   const [isFetchingSuggestions, setIsFetchingSuggestions] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const latestQueryRef = useRef<string>('');
+  const ignoreNextSearchRef = useRef<boolean>(false);
 
   // Keep input synced with current city when prop changes
   useEffect(() => {
+    ignoreNextSearchRef.current = true;
     setSearchInput(currentCity);
+    setIsOpen(false);
+    setIsFocused(false);
   }, [currentCity]);
 
   // Click outside to close autofill recommendations
@@ -55,6 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
         !containerRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
+        setIsFocused(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -63,10 +69,43 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, []);
 
-  // Debounced autofill search
+  const fetchSuggestions = useCallback(async (query: string, shouldOpen = true) => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      setSuggestions([]);
+      setIsFetchingSuggestions(false);
+      setIsOpen(false);
+      return;
+    }
+
+    latestQueryRef.current = trimmed;
+    setIsFetchingSuggestions(true);
+    try {
+      const results = await getCityAutofillSuggestions(trimmed, 8);
+      if (latestQueryRef.current === trimmed) {
+        setSuggestions(results);
+        if (shouldOpen && results.length > 0) {
+          setIsOpen(true);
+          setSelectedIndex(-1);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load autofill suggestions:', err);
+    } finally {
+      if (latestQueryRef.current === trimmed) {
+        setIsFetchingSuggestions(false);
+      }
+    }
+  }, []);
+
+  // Debounced autofill search when typing
   useEffect(() => {
     const trimmed = searchInput.trim();
-    latestQueryRef.current = trimmed;
+
+    if (ignoreNextSearchRef.current) {
+      ignoreNextSearchRef.current = false;
+      return;
+    }
 
     if (trimmed.length < 2) {
       setSuggestions([]);
@@ -75,27 +114,17 @@ export const Header: React.FC<HeaderProps> = ({
       return;
     }
 
-    const timer = setTimeout(async () => {
-      setIsFetchingSuggestions(true);
-      try {
-        const results = await getCityAutofillSuggestions(trimmed, 8);
-        // Only update if the query hasn't changed while request was in-flight
-        if (latestQueryRef.current === trimmed) {
-          setSuggestions(results);
-          setIsOpen(true);
-          setSelectedIndex(-1);
-        }
-      } catch (err) {
-        console.error('Failed to load autofill suggestions:', err);
-      } finally {
-        if (latestQueryRef.current === trimmed) {
-          setIsFetchingSuggestions(false);
-        }
-      }
+    // Only search automatically if user is actively in the search input
+    if (document.activeElement !== inputRef.current && !isFocused) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetchSuggestions(trimmed, true);
     }, 250);
 
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, isFocused, fetchSuggestions]);
 
   const handleSelectSuggestion = useCallback(
     (item: GeocodingResult) => {
@@ -103,9 +132,13 @@ export const Header: React.FC<HeaderProps> = ({
         ? `${item.name}, ${item.admin1}`
         : item.name;
 
-      setSearchInput(display);
+      ignoreNextSearchRef.current = true;
+      latestQueryRef.current = display;
       setIsOpen(false);
+      setIsFocused(false);
       setSuggestions([]);
+      setSearchInput(display);
+      inputRef.current?.blur();
 
       if (onSelectLocation) {
         onSelectLocation(item);
@@ -118,6 +151,11 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    ignoreNextSearchRef.current = true;
+    setIsOpen(false);
+    setIsFocused(false);
+    inputRef.current?.blur();
+
     if (selectedIndex >= 0 && suggestions[selectedIndex]) {
       handleSelectSuggestion(suggestions[selectedIndex]);
       return;
@@ -125,8 +163,19 @@ export const Header: React.FC<HeaderProps> = ({
 
     const trimmed = searchInput.trim();
     if (trimmed) {
-      setIsOpen(false);
       onSearch(trimmed);
+    }
+  };
+
+  const handleInputClickOrFocus = () => {
+    setIsFocused(true);
+    const trimmed = searchInput.trim();
+    if (trimmed.length >= 2) {
+      if (suggestions.length > 0) {
+        setIsOpen(true);
+      } else {
+        fetchSuggestions(trimmed, true);
+      }
     }
   };
 
@@ -238,16 +287,15 @@ export const Header: React.FC<HeaderProps> = ({
                 type="text"
                 value={searchInput}
                 onChange={(e) => {
+                  ignoreNextSearchRef.current = false;
+                  setIsFocused(true);
                   setSearchInput(e.target.value);
                   if (!isOpen && e.target.value.trim().length >= 2) {
                     setIsOpen(true);
                   }
                 }}
-                onFocus={() => {
-                  if (suggestions.length > 0 && searchInput.trim().length >= 2) {
-                    setIsOpen(true);
-                  }
-                }}
+                onClick={handleInputClickOrFocus}
+                onFocus={handleInputClickOrFocus}
                 onKeyDown={handleKeyDown}
                 placeholder="Search city, neighborhood, or borough (e.g. Brooklyn, Greenwich, Tokyo)..."
                 disabled={isLoading}
@@ -312,6 +360,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <button
                           type="button"
                           id={`autofill-option-${item.id}`}
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => handleSelectSuggestion(item)}
                           onMouseEnter={() => setSelectedIndex(index)}
                           className={`w-full text-left px-3.5 py-2.5 flex items-center justify-between gap-3 transition-colors ${
@@ -320,7 +369,7 @@ export const Header: React.FC<HeaderProps> = ({
                               : 'hover:bg-slate-800/60 text-slate-200'
                           }`}
                         >
-                          <div className="flex items-center gap-3 min-w-0">
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
                             <div
                               className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                                 isSelected
@@ -330,11 +379,11 @@ export const Header: React.FC<HeaderProps> = ({
                             >
                               <MapPin className="w-4 h-4" />
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold truncate leading-tight">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold break-words leading-tight">
                                 {item.name}
                               </p>
-                              <p className="text-xs text-slate-400 truncate leading-tight mt-0.5">
+                              <p className="text-xs text-slate-400 break-words leading-tight mt-0.5">
                                 {regionText || 'Coordinates available'}
                               </p>
                             </div>
@@ -377,8 +426,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Popular City Pills */}
-        <div className="flex items-center gap-2 mt-2.5 overflow-x-auto pb-1 no-scrollbar text-xs">
-          <span className="text-slate-500 shrink-0 font-medium text-[11px] uppercase tracking-wider">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2.5 text-xs">
+          <span className="text-slate-500 font-medium text-[11px] uppercase tracking-wider mr-0.5">
             Quick Select:
           </span>
           {POPULAR_CITIES.map((city) => (
@@ -387,12 +436,16 @@ export const Header: React.FC<HeaderProps> = ({
               id={`popular-city-${city.toLowerCase().replace(' ', '-')}`}
               type="button"
               onClick={() => {
+                ignoreNextSearchRef.current = true;
                 setSearchInput(city);
                 setIsOpen(false);
+                setIsFocused(false);
+                setSuggestions([]);
+                inputRef.current?.blur();
                 onSearch(city);
               }}
               disabled={isLoading}
-              className="px-3 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-cyan-300 border border-slate-800/80 hover:border-cyan-500/40 transition-all shrink-0 text-xs disabled:opacity-50"
+              className="px-2.5 sm:px-3 py-1 rounded-full bg-slate-900/90 hover:bg-slate-800 text-slate-400 hover:text-cyan-300 border border-slate-800/80 hover:border-cyan-500/40 transition-all text-xs whitespace-nowrap disabled:opacity-50"
             >
               {city}
             </button>

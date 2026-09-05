@@ -18,8 +18,8 @@ export const ForecastRow: React.FC<ForecastRowProps> = ({ daily, units }) => {
     return `${Math.round(celsius)}°`;
   };
 
-  const getDayAbbr = (day: DailyForecastDay) => {
-    if (day.isToday) return 'TOD';
+  const getDayLabel = (day: DailyForecastDay) => {
+    if (day.isToday) return 'Today';
     return day.dayName.slice(0, 3).toUpperCase();
   };
 
@@ -33,7 +33,7 @@ export const ForecastRow: React.FC<ForecastRowProps> = ({ daily, units }) => {
   return (
     <div
       id="seven-day-forecast-section"
-      className="bg-slate-900/60 border border-slate-800 rounded-3xl p-5 md:p-6 flex flex-col justify-between shadow-xl h-full"
+      className="bg-slate-900/60 border border-slate-800 rounded-3xl p-4 sm:p-5 md:p-6 flex flex-col justify-between shadow-xl h-full min-w-0 overflow-hidden"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -42,12 +42,12 @@ export const ForecastRow: React.FC<ForecastRowProps> = ({ daily, units }) => {
             7-Day Forecast
           </h3>
         </div>
-        <span className="text-[11px] font-semibold text-cyan-400/80 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+        <span className="text-[10px] sm:text-[11px] font-semibold text-cyan-400/80 bg-cyan-500/10 px-2 sm:px-2.5 py-0.5 rounded-full border border-cyan-500/20">
           DAILY OUTLOOK
         </span>
       </div>
 
-      <div className="flex-1 flex flex-col justify-between gap-2.5">
+      <div className="flex-1 flex flex-col justify-between gap-2.5 min-w-0">
         {daily.map((day, idx) => {
           const condition = getWeatherCondition(day.weatherCode);
           const Icon = condition.icon;
@@ -62,20 +62,20 @@ export const ForecastRow: React.FC<ForecastRowProps> = ({ daily, units }) => {
             <div
               key={day.date}
               id={`forecast-card-${idx}`}
-              className={`flex items-center justify-between p-2.5 sm:p-3 rounded-2xl transition-all duration-150 ${
+              className={`flex items-center justify-between p-2 sm:p-3 rounded-2xl transition-all duration-150 min-w-0 gap-1 sm:gap-2 ${
                 isToday
                   ? 'bg-slate-800/70 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.12)]'
                   : 'bg-slate-900/40 border border-slate-800/40 hover:bg-slate-800/40'
               }`}
             >
               {/* Day Code */}
-              <div className="w-11 shrink-0 flex flex-col">
+              <div className="w-12 sm:w-13.5 shrink-0 flex flex-col">
                 <span
-                  className={`text-xs font-bold tracking-wider ${
-                    isToday ? 'text-cyan-400' : 'text-slate-300'
+                  className={`text-xs font-bold ${
+                    isToday ? 'text-cyan-400 tracking-normal' : 'text-slate-300 tracking-wider'
                   }`}
                 >
-                  {getDayAbbr(day)}
+                  {getDayLabel(day)}
                 </span>
                 <span className="text-[10px] text-slate-500 font-medium">
                   {day.formattedDate.split(' ')[1] || day.formattedDate}
@@ -83,18 +83,18 @@ export const ForecastRow: React.FC<ForecastRowProps> = ({ daily, units }) => {
               </div>
 
               {/* Weather Icon & High Temp Badge */}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center border ${
+                  className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center border ${
                     isToday
                       ? 'bg-cyan-500/20 border-cyan-500/30 text-cyan-300'
                       : 'bg-slate-800 border-slate-700/60 text-slate-300'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
                 <span
-                  className={`w-10 text-sm font-bold ${
+                  className={`w-8 sm:w-10 text-xs sm:text-sm font-bold ${
                     isToday ? 'text-white font-extrabold' : 'text-slate-200'
                   }`}
                 >
@@ -103,7 +103,7 @@ export const ForecastRow: React.FC<ForecastRowProps> = ({ daily, units }) => {
               </div>
 
               {/* Temperature Bar */}
-              <div className="flex-1 px-3 min-w-[60px]">
+              <div className="flex-1 px-1.5 sm:px-3 min-w-[35px]">
                 <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden relative">
                   <div
                     className="absolute h-full rounded-full bg-gradient-to-r from-cyan-400 to-amber-400"
@@ -116,14 +116,14 @@ export const ForecastRow: React.FC<ForecastRowProps> = ({ daily, units }) => {
               </div>
 
               {/* Low Temp */}
-              <span className="w-9 text-right text-xs font-semibold text-slate-400 shrink-0">
+              <span className="w-8 sm:w-9 text-right text-xs font-semibold text-slate-400 shrink-0">
                 {convertTemp(day.tempMin)}
               </span>
 
               {/* Rain chance */}
-              <div className="w-12 text-right shrink-0">
+              <div className="w-10 sm:w-12 text-right shrink-0">
                 <span
-                  className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${
+                  className={`inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] font-medium ${
                     day.precipitationProbability >= 40
                       ? 'text-cyan-400'
                       : 'text-slate-500'
